@@ -1,16 +1,21 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from contact import models
 from django.db.models import Q
+from django.core.paginator import Paginator
 # from django.http import Http404
 
 
 def index(request):
     contacts = models.Contact.objects \
         .filter(show=True)\
-        .order_by('-id')[:10]
+        .order_by('-id')
+
+    paginator = Paginator(contacts, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        'contacts': contacts,
+        'page_obj': page_obj,
         'site_tittle': 'Contatos - ',
     }
 
@@ -37,9 +42,14 @@ def search(request):
             )\
         .order_by('-id')
 
+    paginator = Paginator(contacts, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'contacts': contacts,
+        'page_obj': page_obj,
         'site_tittle': 'Contatos - ',
+        'search_value': search_value,
     }
 
     return render(
