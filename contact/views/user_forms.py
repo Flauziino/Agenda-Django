@@ -52,3 +52,30 @@ def logout_view(request):
     auth.logout(request)
 
     return redirect('contact:login')
+
+
+def user_update(request):
+    form = forms.RegisterUpdateForm(instance=request.user)
+
+    if request.method != 'POST':
+        return render(
+            request,
+            'contact/user_update.html',
+            {
+                'form': form
+            }
+        )
+
+    form = forms.RegisterUpdateForm(data=request.POST, instance=request.user)
+
+    if not form.is_valid():
+        return render(
+            request,
+            'contact/user_update.html',
+            {
+                'form': form
+            }
+        )
+
+    form.save()
+    return redirect('contact:user_update')
