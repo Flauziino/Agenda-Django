@@ -1,36 +1,27 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from contact import models
+from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 
 class ContactForm(forms.ModelForm):
-    first_name = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                'class': 'classe-a classe-b',
-                'placeholder': 'Aqui veio do init',
-            }
-        ),
-        label='Primeiro Nome',
-        help_text='Texto de ajuda para seu usuário',
-    )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    picture = forms.ImageField(
+        widget=forms.FileInput(
+            attrs={
+                'accept': 'image/*',
+            }
+        )
+    )
 
     class Meta:
         model = models.Contact
         fields = (
             'first_name', 'last_name', 'phone',
             'email', 'description', 'category',
+            'picture',
         )
-        # widgets = {
-        #     'first_name': forms.TextInput(
-        #         attrs={
-        #             '': ''
-        #         }
-        #     )
-        # }
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -59,3 +50,30 @@ class ContactForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+
+class RegisterForm(UserCreationForm):
+    first_name = forms.CharField(required=True, min_length=4)
+    email = forms.EmailField(required=True)
+    username = forms.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'email',
+            'username', 'password1', 'password2',
+        )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+
+        if User.objects.filter(email=email).exists():
+            self.add_error(
+                'email',
+                ValidationError(
+                    'Esse email ja existe no banco de dados',
+                    code='invalid'
+                )
+            )
+
+        return email
