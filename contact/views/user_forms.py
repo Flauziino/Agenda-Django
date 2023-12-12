@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib import auth
-from django.contrib.auth.forms import AuthenticationForm
 from contact import forms
 
 
@@ -48,12 +49,14 @@ def login_view(request):
         )
 
 
+@login_required(login_url='contact:login')
 def logout_view(request):
     auth.logout(request)
 
     return redirect('contact:login')
 
 
+@login_required(login_url='contact:login')
 def user_update(request):
     form = forms.RegisterUpdateForm(instance=request.user)
 
